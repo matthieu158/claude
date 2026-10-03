@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hello World</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b1d33; --bg2: #123a5c; --ink: #f2f6fa; --muted: #a9bfd3; --accent: #5cc8e8;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { min-height: 100%; }
+  body {
+    font-family: Inter, system-ui, sans-serif;
+    color: var(--ink);
+    background: linear-gradient(160deg, var(--bg) 0%, var(--bg2) 100%) fixed;
+    background-color: var(--bg);
+    min-height: 100vh;
+    display: grid; place-items: center;
+    padding: 32px 16px;
+    transition: background-color .8s ease, color .8s ease;
+  }
+  main { width: 100%; max-width: 760px; text-align: center; }
+  h1 {
+    font-family: Fraunces, Georgia, serif; font-weight: 600;
+    font-size: clamp(2.6rem, 9vw, 5rem); letter-spacing: -0.02em; line-height: 1;
+    margin-bottom: 8px;
+  }
+  .date { color: var(--muted); font-size: .95rem; margin-bottom: 28px; }
+  .card {
+    background: color-mix(in srgb, var(--bg) 55%, transparent);
+    border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
+    border-radius: 20px; overflow: hidden;
+    box-shadow: 0 24px 60px -20px rgba(0,0,0,.45);
+  }
+  .picture { display: block; width: 100%; aspect-ratio: 16 / 9; }
+  .picture svg { width: 100%; height: 100%; display: block; }
+  figcaption { padding: 28px 24px 30px; }
+  blockquote {
+    font-family: Fraunces, Georgia, serif; font-style: italic; font-weight: 400;
+    font-size: clamp(1.2rem, 3.6vw, 1.6rem); line-height: 1.4;
+  }
+  cite { display: block; margin-top: 14px; font-style: normal; color: var(--accent); font-weight: 500; }
+  .theme { margin-top: 6px; color: var(--muted); font-size: .85rem; text-transform: uppercase; letter-spacing: .12em; }
+  button {
+    margin-top: 24px; font: inherit; font-weight: 500;
+    color: var(--bg); background: var(--accent);
+    border: 0; border-radius: 999px; padding: 10px 22px; cursor: pointer;
+  }
+  button:hover { filter: brightness(1.1); }
+  button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Hello, World</h1>
+  <p class="date" id="date"></p>
+  <figure class="card">
+    <div class="picture" id="picture" role="img"></div>
+    <figcaption>
+      <blockquote id="quote"></blockquote>
+      <cite id="author"></cite>
+      <p class="theme" id="theme"></p>
+    </figcaption>
+  </figure>
+  <button id="shuffle" type="button">Another quote</button>
+</main>
+
+<script>
+// Each theme owns a palette and a hand-drawn SVG scene; quotes point at a theme.
+const THEMES = {
+  ocean: {
+    label: "Ocean", bg: "#0b1d33", bg2: "#123a5c", ink: "#f2f6fa", muted: "#a9bfd3", accent: "#5cc8e8",
+    alt: "Waves rolling under a pale sky",
+    svg: `<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fd8ee"/><stop offset="1" stop-color="#e8f6fb"/></linearGradient></defs>
+      <rect width="1600" height="900" fill="url(#s)"/>
+      <circle cx="1220" cy="260" r="90" fill="#fff6d8"/>
+      <path d="M0 520 Q200 470 400 520 T800 520 T1200 520 T1600 520 V900 H0Z" fill="#3aa3c9"/>
+      <path d="M0 610 Q200 560 400 610 T800 610 T1200 610 T1600 610 V900 H0Z" fill="#1f7ea8"/>
+      <path d="M0 710 Q200 660 400 710 T800 710 T1200 710 T1600 710 V900 H0Z" fill="#14567d"/>
+      <path d="M0 810 Q200 760 400 810 T800 810 T1200 810 T1600 810 V900 H0Z" fill="#0b3554"/>`
+  },
+  forest: {
+    label: "Forest", bg: "#10241a", bg2: "#1f4430", ink: "#eef5ec", muted: "#a8c4ad", accent: "#8fd694",
+    alt: "Layers of pine trees in morning mist",
+    svg: `<rect width="1600" height="900" fill="#d9ead3"/>
+      <circle cx="400" cy="230" r="80" fill="#fffbe6"/>
+      ${[["#9cc5a1",520,.9],["#5e9a6c",640,1.1],["#2f6b45",770,1.3]].map(([c,y,s])=>{
+        let p="";for(let x=-40;x<1650;x+=90*s){p+=`<polygon points="${x},${y} ${x+60*s},${y-220*s} ${x+120*s},${y}" fill="${c}"/>`}
+        return p+`<rect y="${y-2}" width="1600" height="${900-y+2}" fill="${c}"/>`}).join("")}`
+  },
+  sunrise: {
+    label: "Sunrise", bg: "#3a1c32", bg2: "#8a3b4a", ink: "#fff4ea", muted: "#f2c7b5", accent: "#ffb36b",
+    alt: "A sun rising over soft rolling hills",
+    svg: `<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9a76"/><stop offset=".6" stop-color="#ffd59e"/><stop offset="1" stop-color="#fff1d0"/></linearGradient></defs>
+      <rect width="1600" height="900" fill="url(#s)"/>
+      <circle cx="800" cy="600" r="170" fill="#fff3c4"/>
+      <path d="M0 640 Q400 520 800 640 T1600 620 V900 H0Z" fill="#c9605b"/>
+      <path d="M0 740 Q500 620 1000 730 T1600 700 V900 H0Z" fill="#8a3b4a"/>
+      <path d="M0 830 Q600 740 1600 820 V900 H0Z" fill="#5a2639"/>`
+  },
+  night: {
+    label: "Starry night", bg: "#0a0b1e", bg2: "#22234a", ink: "#eceaff", muted: "#a9a6d6", accent: "#c3b5ff",
+    alt: "A crescent moon and stars over dark hills",
+    svg: `<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b0d2a"/><stop offset="1" stop-color="#2d2c66"/></linearGradient><mask id="m"><rect width="1600" height="900" fill="#fff"/><circle cx="1240" cy="190" r="80" fill="#000"/></mask></defs>
+      <rect width="1600" height="900" fill="url(#s)"/>
+      ${Array.from({length:90},(_, i)=>`<circle cx="${(i*197)%1600}" cy="${(i*131)%560}" r="${1+(i%3)}" fill="#fff" opacity="${.4+(i%5)/10}"/>`).join("")}
+      <circle cx="1200" cy="210" r="85" fill="#fff6d5" mask="url(#m)"/>
+      <path d="M0 700 Q300 600 650 690 T1600 650 V900 H0Z" fill="#17173a"/>
+      <path d="M0 800 Q500 720 1000 800 T1600 780 V900 H0Z" fill="#0d0d24"/>`
+  },
+  mountain: {
+    label: "Mountains", bg: "#1b2430", bg2: "#3b4a5e", ink: "#f3f5f8", muted: "#b6c0cd", accent: "#9ec3ff",
+    alt: "Snow-capped peaks under a clear sky",
+    svg: `<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9c8f0"/><stop offset="1" stop-color="#eef3fa"/></linearGradient></defs>
+      <rect width="1600" height="900" fill="url(#s)"/>
+      <polygon points="200,900 700,220 1200,900" fill="#6d7f99"/>
+      <polygon points="700,220 610,342 660,330 700,370 745,320 790,342" fill="#fff"/>
+      <polygon points="800,900 1200,330 1650,900" fill="#56667d"/>
+      <polygon points="1200,330 1130,430 1180,415 1215,450 1250,420 1270,430" fill="#fff"/>
+      <polygon points="-100,900 300,420 700,900" fill="#485669"/>
+      <path d="M0 800 Q400 760 800 800 T1600 790 V900 H0Z" fill="#2c3747"/>`
+  },
+  desert: {
+    label: "Desert", bg: "#3a2414", bg2: "#7a4a24", ink: "#fff6ea", muted: "#e6c8a6", accent: "#f2b35a",
+    alt: "Golden dunes under a hot sun",
+    svg: `<rect width="1600" height="900" fill="#f8e3bf"/>
+      <circle cx="1150" cy="240" r="110" fill="#fff4d6"/>
+      <path d="M0 560 Q350 430 700 560 T1600 520 V900 H0Z" fill="#e9b872"/>
+      <path d="M0 680 Q500 560 950 680 T1600 640 V900 H0Z" fill="#d49a52"/>
+      <path d="M0 800 Q400 700 900 790 T1600 760 V900 H0Z" fill="#b5773a"/>
+      <g fill="#5e7a3a"><rect x="300" y="520" width="22" height="120" rx="11"/><rect x="270" y="555" width="14" height="50" rx="7"/><rect x="270" y="590" width="40" height="14" rx="7"/><rect x="330" y="545" width="14" height="45" rx="7"/><rect x="310" y="578" width="34" height="14" rx="7"/></g>`
+  },
+  autumn: {
+    label: "Autumn", bg: "#2b160c", bg2: "#6b2e14", ink: "#fff3e6", muted: "#e9bf9c", accent: "#ff8c42",
+    alt: "A lone tree with orange leaves falling",
+    svg: `<rect width="1600" height="900" fill="#fbe4c8"/>
+      <path d="M0 720 Q800 640 1600 720 V900 H0Z" fill="#c8662e"/>
+      <rect x="780" y="380" width="40" height="320" fill="#5a3320"/>
+      <path d="M800 470 L700 380 M800 520 L900 410" stroke="#5a3320" stroke-width="16" stroke-linecap="round"/>
+      ${[[800,300,190,"#e2572a"],[680,360,130,"#f08a2e"],[930,360,140,"#d9442a"],[800,400,140,"#f5a742"]].map(([x,y,r,c])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${c}"/>`).join("")}
+      ${Array.from({length:16},(_, i)=>`<ellipse cx="${300+(i*83)%1000}" cy="${560+(i*47)%200}" rx="12" ry="7" fill="${i%2?"#e2572a":"#f5a742"}" transform="rotate(${i*37} ${300+(i*83)%1000} ${560+(i*47)%200})"/>`).join("")}`
+  }
+};
+
+const QUOTES = [
+  { text: "You cannot cross the sea merely by standing and staring at the water.", author: "Rabindranath Tagore", theme: "ocean" },
+  { text: "The sea, once it casts its spell, holds one in its net of wonder forever.", author: "Jacques Cousteau", theme: "ocean" },
+  { text: "In every walk with nature one receives far more than he seeks.", author: "John Muir", theme: "forest" },
+  { text: "The best time to plant a tree was twenty years ago. The second best time is now.", author: "Chinese proverb", theme: "forest" },
+  { text: "When you arise in the morning, think of what a precious privilege it is to be alive.", author: "Marcus Aurelius", theme: "sunrise" },
+  { text: "We know what we are, but know not what we may be.", author: "William Shakespeare", theme: "night" },
+  { text: "Two things fill the mind with ever new and increasing awe: the starry heavens above me and the moral law within me.", author: "Immanuel Kant", theme: "night" },
+  { text: "It is not the mountain we conquer, but ourselves.", author: "Edmund Hillary", theme: "mountain" },
+  { text: "What makes the desert beautiful is that somewhere it hides a well.", author: "Antoine de Saint-Exupéry", theme: "desert" },
+  { text: "Autumn is a second spring when every leaf is a flower.", author: "Albert Camus", theme: "autumn" }
+];
+
+// Same quote for everyone on a given day: seed by the local calendar date.
+const today = new Date();
+const dayNumber = Math.floor(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) / 86400000);
+let index = dayNumber % QUOTES.length;
+
+function render(i) {
+  const q = QUOTES[i];
+  const t = THEMES[q.theme];
+  const root = document.documentElement.style;
+  for (const k of ["bg", "bg2", "ink", "muted", "accent"]) root.setProperty(`--${k}`, t[k]);
+  const pic = document.getElementById("picture");
+  pic.innerHTML = `<svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${t.svg}</svg>`;
+  pic.setAttribute("aria-label", t.alt);
+  document.getElementById("quote").textContent = `“${q.text}”`;
+  document.getElementById("author").textContent = `— ${q.author}`;
+  document.getElementById("theme").textContent = t.label;
+}
+
+document.getElementById("date").textContent =
+  "Quote of the day · " + today.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+
+document.getElementById("shuffle").addEventListener("click", () => {
+  let next;
+  do { next = Math.floor(Math.random() * QUOTES.length); } while (next === index && QUOTES.length > 1);
+  index = next;
+  render(index);
+});
+
+render(index);
+</script>
+</body>
+</html>
