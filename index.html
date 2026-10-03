@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project Index</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1420; --bg2: #1c2436; --ink: #eef1f6; --muted: #9aa5b8; --accent: #7cc4ff; --line: #2b3550;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    font-family: Inter, system-ui, sans-serif;
+    color: var(--ink);
+    background: linear-gradient(160deg, var(--bg) 0%, var(--bg2) 100%) fixed;
+    background-color: var(--bg);
+    min-height: 100vh;
+    padding: 64px 16px;
+  }
+  main { max-width: 640px; margin: 0 auto; }
+  h1 { font-family: Fraunces, Georgia, serif; font-weight: 600; font-size: clamp(2.2rem, 7vw, 3.4rem); letter-spacing: -0.02em; }
+  .sub { color: var(--muted); margin: 8px 0 32px; }
+  ul { list-style: none; padding: 0; display: grid; gap: 10px; }
+  a.folder {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px 18px; border: 1px solid var(--line); border-radius: 14px;
+    color: var(--ink); text-decoration: none; background: color-mix(in srgb, var(--bg) 60%, transparent);
+    transition: border-color .15s, transform .15s;
+  }
+  a.folder:hover, a.folder:focus-visible { border-color: var(--accent); transform: translateX(3px); outline: none; }
+  .icon { width: 22px; height: 22px; flex: none; color: var(--accent); }
+  .name { font-weight: 500; }
+  .arrow { margin-left: auto; color: var(--muted); }
+  .note { color: var(--muted); font-size: .9rem; margin-top: 24px; }
+  .note a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Projects</h1>
+  <p class="sub">Every folder in this repository.</p>
+  <ul id="list"></ul>
+  <p class="note" id="note"></p>
+</main>
+
+<script>
+const OWNER = "matthieu158";
+const REPO = "claude";
+// Shown if the GitHub API can't be reached (offline, rate-limited). Keep in sync by hand.
+const FALLBACK = ["helloworld"];
+
+const icon = `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>`;
+
+function show(folders) {
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+  for (const name of folders) {
+    const li = document.createElement("li");
+    const a = document.createElement("a");
+    a.className = "folder";
+    a.href = `./${encodeURIComponent(name)}/`;
+    a.innerHTML = `${icon}<span class="name"></span><span class="arrow">→</span>`;
+    a.querySelector(".name").textContent = name;
+    li.append(a);
+    list.append(li);
+  }
+  if (!folders.length) document.getElementById("note").textContent = "No folders yet.";
+}
+
+// Lists the root of the default branch, which is the branch Pages serves.
+fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/`)
+  .then(r => r.ok ? r.json() : Promise.reject(r.status))
+  .then(items => show(items
+    .filter(i => i.type === "dir" && !i.name.startsWith("."))
+    .map(i => i.name)
+    .sort((a, b) => a.localeCompare(b))))
+  .catch(() => {
+    show(FALLBACK);
+    document.getElementById("note").innerHTML =
+      `Couldn't reach GitHub, so this list may be out of date. <a href="https://github.com/${OWNER}/${REPO}">Browse the repository</a>.`;
+  });
+</script>
+</body>
+</html>
