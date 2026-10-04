@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Les cousines à HK</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Public+Sans:wght@400;600&family=Noto+Serif+TC:wght@600&display=swap" rel="stylesheet">
+<style>
+  /* Layout: signage-style masthead, a "travel details" strip tuned to where the reader is, then seven day cards in order. */
+  :root {
+    --bg: #f3f5f2;
+    --surface: #ffffff;
+    --ink: #14211c;
+    --muted: #5b6b64;
+    --line: #d5ddd8;
+    --red: #c8102e;
+    --jade: #00745a;
+    --chip: #e6efe9;
+    --display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+    --body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --han: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d1517; --surface: #142024; --ink: #e9f0ec; --muted: #94a69e; --line: #263538;
+      --red: #ff4d6a; --jade: #3fd0a4; --chip: #1b2c2e; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d1517; --surface: #142024; --ink: #e9f0ec; --muted: #94a69e; --line: #263538;
+    --red: #ff4d6a; --jade: #3fd0a4; --chip: #1b2c2e; color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding-inline: 16px; padding-block: 40px 64px; display: grid; gap: 32px; }
+
+  header { display: grid; grid-template-columns: auto 1fr; gap: 8px 24px; align-items: end; }
+  .han-big { font-family: var(--han); font-size: clamp(3.4rem, 12vw, 6.5rem); line-height: .9; color: var(--red); grid-row: span 2; }
+  h1 { font-family: var(--display); font-weight: 900; text-transform: uppercase; font-size: clamp(2.2rem, 7vw, 4rem); line-height: .95; margin: 0; letter-spacing: .01em; text-wrap: balance; }
+  .lede { margin: 0; color: var(--muted); max-width: 60ch; }
+  @media (max-width: 520px) { header { grid-template-columns: 1fr; } .han-big { grid-row: auto; } }
+
+  .origin { display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: center; justify-content: space-between;
+            background: var(--surface); border: 1px solid var(--line); border-left: 6px solid var(--jade); padding: 16px 20px; border-radius: 4px; }
+  .origin > div { min-width: 0; }
+  .eyebrow { font-size: .75rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); font-weight: 600; }
+  .who { font-family: var(--display); font-weight: 700; font-size: 1.6rem; line-height: 1.1; }
+  .how { font-size: .85rem; color: var(--muted); }
+  .facts { display: flex; flex-wrap: wrap; gap: 8px 24px; }
+  .fact .v { font-family: var(--display); font-weight: 700; font-size: 1.3rem; font-variant-numeric: tabular-nums; }
+  .picker { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .picker label { font-size: .85rem; color: var(--muted); }
+  select { font: inherit; font-size: .95rem; padding: 6px 10px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--ink); max-width: 100%; }
+  select:focus-visible, button:focus-visible { outline: 2px solid var(--jade); outline-offset: 2px; }
+  button.reset { font: inherit; font-size: .85rem; background: none; border: none; color: var(--jade); cursor: pointer; text-decoration: underline; padding: 4px; }
+
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; }
+  .filters button { font: inherit; font-size: .85rem; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+  .filters button[aria-pressed="true"] { background: var(--jade); border-color: var(--jade); color: var(--surface); }
+  .group { display: grid; gap: 12px; }
+  .group-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; border-bottom: 2px solid var(--red); padding-bottom: 6px; }
+  .group h2 { font-family: var(--display); font-weight: 900; text-transform: uppercase; font-size: 1.6rem; line-height: 1; margin: 0; }
+  .sub { color: var(--muted); font-size: .9rem; }
+  ul.things { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; }
+  .thing { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 16px 18px; display: grid; gap: 4px; align-content: start; }
+  .thing-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .thing h3 { font-size: 1.02rem; font-weight: 600; margin: 0; line-height: 1.3; min-width: 0; }
+  .time { font-size: .8rem; font-weight: 600; color: var(--red); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .thing p { margin: 4px 0 6px; font-size: .93rem; }
+  .thing .chip { justify-self: start; }
+  .zh { font-family: var(--han); color: var(--muted); font-size: .95rem; }
+  .chip { font-size: .75rem; background: var(--chip); color: var(--ink); padding: 2px 8px; border-radius: 2px; }
+
+  .tips { display: grid; gap: 8px; border-top: 1px solid var(--line); padding-top: 20px; color: var(--muted); font-size: .9rem; }
+  .tips h3 { font-family: var(--display); font-weight: 700; font-size: 1.3rem; color: var(--ink); margin: 0; text-transform: uppercase; }
+  .tips ul { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; max-width: 75ch; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="han-big" aria-hidden="true">香港</div>
+    <h1>Les cousines à HK</h1>
+    <p class="lede">Les idées pour la semaine des cousines venues de Belgique, rangées selon la distance depuis leur hôtel à Sheung Wan.</p>
+  </header>
+
+  <section class="origin" aria-live="polite">
+    <div>
+      <div class="eyebrow">Vous partez de</div>
+      <div class="who" id="who">—</div>
+      <div class="how" id="how"></div>
+    </div>
+    <div class="facts">
+      <div class="fact"><div class="eyebrow">Décalage</div><div class="v" id="lag">—</div></div>
+      <div class="fact"><div class="eyebrow">Prises</div><div class="v" id="plug">Type G</div></div>
+    </div>
+    <div class="picker">
+      <label for="country">Pas le bon pays ?</label>
+      <select id="country"></select>
+      <button class="reset" id="detect" type="button">Détecter mon pays</button>
+    </div>
+  </section>
+
+  <div class="filters" id="filters" role="group" aria-label="Filtrer par type"></div>
+
+  <div id="groups" style="display:grid;gap:32px"></div>
+  <p class="how" style="margin:0">Temps de trajet approximatifs depuis la station MTR Sheung Wan, hors heures de pointe.</p>
+
+  <section class="tips">
+    <h3>Avant de partir</h3>
+    <ul id="tips"></ul>
+    <p>Le programme est réglé sur la Belgique. Vous pouvez choisir un autre pays dans le menu, ou laisser la page le deviner à partir du fuseau horaire et de la langue de votre appareil. Rien n'est envoyé nulle part.</p>
+  </section>
+</div>
+
+<script>
+// Things to do, grouped by how far they are from Sheung Wan MTR station.
+// Each item: [name, chinese, type, time from Sheung Wan, description].
+const GROUPS = [
+  { title: "À pied depuis Sheung Wan", sub: "Moins de 15 minutes, sans transport", items: [
+    ["Man Mo Temple et Hollywood Road", "文武廟", "Culture", "5 min à pied", "Un temple de 1847 où pendent d'énormes spirales d'encens. Ensuite, les antiquaires de Hollywood Road et le marché aux puces de Cat Street."],
+    ["La rue des produits séchés et Western Market", "海味街 · 西港城", "Cuisine", "5 min à pied", "Des Voeux Road West et Wing Lok Street : ormeaux, champignons, nids d'hirondelle et herboristes. Western Market est un marché couvert édouardien en briques rouges."],
+    ["Dim sum du matin", "飲茶", "Cuisine", "À pied", "Les salles de yum cha de Sheung Wan et Central se remplissent dès 8 h. Commandez har gow, siu mai et char siu bao."],
+    ["Tai Kwun, PMQ et SoHo", "大館", "Culture", "15 min à pied", "Un ancien commissariat et une prison devenus centre d'art. Montez par l'escalator des Mid-Levels jusqu'aux boutiques de créateurs de PMQ."],
+    ["Le tram « ding ding »", "電車", "Balade", "2 min à pied", "Des trams à impériale depuis 1904, arrêt sur Des Voeux Road. Asseyez-vous en haut à l'avant jusqu'à Causeway Bay ou North Point."],
+    ["Lan Kwai Fong et les rooftops", "蘭桂坊", "Soirée", "15 min à pied", "Les ruelles festives de Central, et des bars en terrasse avec vue sur les tours."],
+    ["Le Star Ferry", "天星小輪", "Vue", "15 min à pied", "Depuis le quai n° 7 de Central, 10 minutes de traversée pour quelques dollars. Le pont supérieur offre la meilleure vue de la baie."],
+  ]},
+  { title: "Ailleurs sur l'île", sub: "De 10 minutes à 1 heure", items: [
+    ["Sai Ying Pun et Kennedy Town", "西營盤 · 堅尼地城", "Soirée", "5 min en MTR", "Deux stations à l'ouest : cafés, petits bars, et le coucher de soleil sur le front de mer de Kennedy Town."],
+    ["Victoria Peak", "太平山頂", "Vue", "20 min", "Taxi ou bus 15 jusqu'au sommet, ou le Peak Tram depuis Garden Road. Faites la boucle de Lugard Road au coucher du soleil."],
+    ["Les courses de Happy Valley", "跑馬地", "Soirée", "25 min en tram", "Le mercredi soir en saison (septembre à juillet), courses de chevaux sous les projecteurs au milieu des tours. Entrée bon marché, ambiance bière et paris."],
+    ["Randonnée du Dragon's Back", "龍脊", "Nature", "1 h", "MTR jusqu'à Shau Kei Wan puis bus 9. Une crête avec la mer des deux côtés, qui finit à la plage de Big Wave Bay. Déjeuner ensuite au village de Shek O."],
+  ]},
+  { title: "Kowloon", sub: "De l'autre côté de la baie", items: [
+    ["Tsim Sha Tsui et la Symphony of Lights", "尖沙咀 · 幻彩詠香江", "Vue", "25 min en Star Ferry", "Promenade sur l'Avenue of Stars, puis le spectacle de lumières sur les tours à 20 h. Retour en Star Ferry de nuit."],
+    ["M+ et le Palace Museum", "M+ · 香港故宮", "Culture", "15 min en taxi", "Les deux grands musées de West Kowloon, avec un parc au bord de l'eau. Réservez le Palace Museum à l'avance et vérifiez les jours de fermeture."],
+    ["Temple Street Night Market", "廟街", "Cuisine", "20 min en MTR", "Station Jordan. Riz en claypot, fruits de mer, diseurs de bonne aventure, à partir de 20 h."],
+    ["Les marchés de Mong Kok", "旺角", "Shopping", "25 min en MTR", "Ladies' Market, marché aux poissons rouges, marché aux fleurs et jardin aux oiseaux de Yuen Po Street, tous à quelques rues."],
+    ["Sham Shui Po", "深水埗", "Cuisine", "25 min en MTR", "Le quartier le plus populaire : tofu fa, nouilles, tissus et électronique. Beaucoup d'adresses n'acceptent que le liquide."],
+    ["Wong Tai Sin et Chi Lin", "黃大仙 · 志蓮淨苑", "Culture", "35 min en MTR", "Le temple le plus fréquenté de Hong Kong et ses bâtonnets de bonne aventure, puis le couvent en bois de Chi Lin et le jardin de Nan Lian."],
+  ]},
+  { title: "Plus loin", sub: "Une demi-journée ou une journée entière", items: [
+    ["Macao", "澳門", "Excursion", "Terminal à 2 min à pied", "Le terminal des ferries pour Macao est à Shun Tak Centre, juste au-dessus de la station Sheung Wan. Environ 1 h de traversée. Passeport obligatoire."],
+    ["L'île de Lamma", "南丫島", "Nature", "45 min", "Ferry depuis le quai n° 4 de Central. Pas de voitures, un sentier de Yung Shue Wan à Sok Kwu Wan et des fruits de mer au bord de l'eau."],
+    ["Big Buddha et Ngong Ping 360", "天壇大佛", "Vue", "1 h 15", "MTR jusqu'à Tung Chung puis 25 minutes de téléphérique au-dessus des collines. Déjeuner végétarien au monastère Po Lin."],
+    ["Le village de Tai O", "大澳", "Culture", "+30 min après le Buddha", "Maisons sur pilotis, poisson séché et petits bateaux pour voir les dauphins roses. À combiner avec le Big Buddha."],
+    ["Sai Kung", "西貢", "Nature", "1 h 15", "Fruits de mer choisis dans les bassins du port, puis un kaito (bateau-taxi) vers une plage tranquille."],
+  ]},
+];
+const TYPES = ["Tout", ...new Set(GROUPS.flatMap(g => g.items.map(i => i[2])))];
+
+// Per-country practical details. lagHint is used when the country was picked by hand.
+const COUNTRIES = {
+  FR: { tz: "Europe/Paris" }, BE: { tz: "Europe/Brussels" }, CH: { tz: "Europe/Zurich" }, LU: { tz: "Europe/Luxembourg" },
+  MC: { tz: "Europe/Monaco" }, CA: { tz: "America/Toronto" }, MA: { tz: "Africa/Casablanca" }, TN: { tz: "Africa/Tunis" },
+  SN: { tz: "Africa/Dakar" }, CI: { tz: "Africa/Abidjan" }, RE: { tz: "Indian/Reunion" }, MU: { tz: "Indian/Mauritius" },
+  NC: { tz: "Pacific/Noumea" }, PF: { tz: "Pacific/Tahiti" }, DE: { tz: "Europe/Berlin" }, ES: { tz: "Europe/Madrid" },
+  IT: { tz: "Europe/Rome" }, NL: { tz: "Europe/Amsterdam" }, PT: { tz: "Europe/Lisbon" }, GB: { tz: "Europe/London", plug: true },
+  IE: { tz: "Europe/Dublin", plug: true }, US: { tz: "America/New_York" }, AU: { tz: "Australia/Sydney" },
+  SG: { tz: "Asia/Singapore", plug: true }, MY: { tz: "Asia/Kuala_Lumpur", plug: true }, AE: { tz: "Asia/Dubai", plug: true },
+  CN: { tz: "Asia/Shanghai" }, JP: { tz: "Asia/Tokyo" }, HK: { tz: "Asia/Hong_Kong", plug: true },
+};
+const TZ_TO_COUNTRY = Object.fromEntries(Object.entries(COUNTRIES).map(([c, v]) => [v.tz, c]));
+Object.assign(TZ_TO_COUNTRY, { "America/Montreal": "CA", "America/Vancouver": "CA", "America/Chicago": "US", "America/Los_Angeles": "US",
+  "America/Denver": "US", "Australia/Melbourne": "AU", "Australia/Perth": "AU", "Asia/Urumqi": "CN" });
+
+const regionNames = (() => { try { return new Intl.DisplayNames(["fr"], { type: "region" }); } catch { return null; } })();
+const nameOf = c => (regionNames && regionNames.of(c)) || c;
+
+// Minutes east of UTC for a time zone, right now.
+function offsetMinutes(tz) {
+  try {
+    const parts = new Intl.DateTimeFormat("en-US", { timeZone: tz, hourCycle: "h23", year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "numeric" })
+      .formatToParts(new Date()).reduce((o, p) => (o[p.type] = +p.value, o), {});
+    const asUtc = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute);
+    return Math.round((asUtc - Date.now()) / 60000);
+  } catch { return null; }
+}
+function lagText(tz) {
+  const a = offsetMinutes(tz), b = offsetMinutes("Asia/Hong_Kong");
+  if (a == null || b == null) return "—";
+  const d = (b - a) / 60;
+  if (d === 0) return "Aucun";
+  const h = Math.abs(d).toLocaleString("fr-FR", { maximumFractionDigits: 1 }) + " h";
+  return d > 0 ? `+${h} à HK` : `−${h} à HK`;
+}
+
+function detect() {
+  let tz = "";
+  try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch {}
+  if (TZ_TO_COUNTRY[tz]) return { country: TZ_TO_COUNTRY[tz], tz, how: `Détecté grâce à votre fuseau horaire (${tz}).` };
+  for (const lang of navigator.languages || [navigator.language]) {
+    const m = /-([A-Z]{2})\b/.exec(lang || "");
+    if (m && COUNTRIES[m[1]]) return { country: m[1], tz: tz || COUNTRIES[m[1]].tz, how: `Détecté grâce à la langue de votre navigateur (${lang}).` };
+  }
+  return { country: null, tz, how: "Impossible de détecter votre pays." };
+}
+
+const store = {
+  get() { try { return localStorage.getItem("hkc-country"); } catch { return null; } },
+  set(v) { try { v ? localStorage.setItem("hkc-country", v) : localStorage.removeItem("hkc-country"); } catch {} },
+};
+
+const DEFAULT_COUNTRY = "BE";
+const sel = document.getElementById("country");
+const detectBtn = document.getElementById("detect");
+sel.append(new Option("Autre pays", ""));
+Object.keys(COUNTRIES).map(c => [c, nameOf(c)]).sort((a, b) => a[1].localeCompare(b[1], "fr"))
+  .forEach(([c, n]) => sel.append(new Option(n, c)));
+
+// source: "default" | "picked" | "detected". A detected time zone beats the country's main one.
+function renderOrigin(country, source, how, tz) {
+  document.getElementById("who").textContent = country ? nameOf(country) : "Ailleurs";
+  document.getElementById("how").textContent =
+    source === "default" ? "Pays des cousines." : source === "picked" ? "Choisi par vous." : how;
+  tz = tz || (country && COUNTRIES[country].tz);
+  document.getElementById("lag").textContent = tz ? lagText(tz) : "—";
+  const sameplug = country && COUNTRIES[country].plug;
+  document.getElementById("plug").textContent = sameplug ? "Type G, comme chez vous" : "Type G, adaptateur";
+  sel.value = country || "";
+
+  const tips = [
+    "Depuis l'aéroport : Airport Express jusqu'à la station Hong Kong (environ 25 min), puis 10 minutes à pied ou un taxi jusqu'à Sheung Wan.",
+    "Carte Octopus : métro, bus, tram, ferries et supérettes. Rechargeable au 7-Eleven.",
+    "La climatisation est très forte à l'intérieur : prévoyez une petite veste, même en été.",
+    "Pas de pourboire attendu : la plupart des restaurants ajoutent 10 % de service.",
+    "D'avril à octobre il fait chaud et humide, avec des typhons possibles. Surveillez l'Observatoire de Hong Kong (signal T8 = tout ferme).",
+  ];
+  if (!sameplug) tips.unshift("Prises britanniques à trois broches (type G) : prenez un adaptateur.");
+  if (country === "BE") tips.unshift(
+    "Passeport belge : pas de visa pour un court séjour touristique. Vérifiez quand même les conditions sur diplomatie.belgium.be avant de partir.",
+    "Bancontact ne fonctionne pas sur place : prenez une carte Visa ou Mastercard et retirez quelques dollars de Hong Kong.",
+    "Hong Kong est hors de l'UE : le roaming coûte cher. Achetez une eSIM ou une carte SIM touristique à l'aéroport.");
+  else if (country === "FR" || country === "CH" || country === "LU")
+    tips.unshift("Vérifiez les conditions d'entrée pour votre passeport avant le départ. Le passeport doit être valide pendant tout le séjour.");
+  const ul = document.getElementById("tips");
+  ul.innerHTML = "";
+  for (const t of tips) { const li = document.createElement("li"); li.textContent = t; ul.append(li); }
+}
+
+function renderThings(filter) {
+  const root = document.getElementById("groups");
+  root.innerHTML = "";
+  for (const g of GROUPS) {
+    const items = g.items.filter(i => filter === "Tout" || i[2] === filter);
+    if (!items.length) continue;
+    const sec = document.createElement("section");
+    sec.className = "group";
+    sec.innerHTML = `<div class="group-head"><h2></h2><span class="sub"></span></div><ul class="things"></ul>`;
+    sec.querySelector("h2").textContent = g.title;
+    sec.querySelector(".sub").textContent = g.sub;
+    const ul = sec.querySelector("ul");
+    for (const [name, zh, type, time, desc] of items) {
+      const li = document.createElement("li");
+      li.className = "thing";
+      li.innerHTML = `<div class="thing-head"><h3></h3><span class="time"></span></div>
+        <div class="zh" lang="zh-Hant"></div><p></p><span class="chip"></span>`;
+      li.querySelector("h3").textContent = name;
+      li.querySelector(".time").textContent = time;
+      li.querySelector(".zh").textContent = zh;
+      li.querySelector("p").textContent = desc;
+      li.querySelector(".chip").textContent = type;
+      ul.append(li);
+    }
+    root.append(sec);
+  }
+  document.querySelectorAll(".filters button").forEach(b => b.setAttribute("aria-pressed", b.dataset.type === filter));
+}
+
+function renderFilters() {
+  const bar = document.getElementById("filters");
+  for (const t of TYPES) {
+    const b = document.createElement("button");
+    b.type = "button"; b.dataset.type = t; b.textContent = t;
+    b.addEventListener("click", () => renderThings(t));
+    bar.append(b);
+  }
+}
+
+sel.addEventListener("change", () => { store.set(sel.value || "none"); renderOrigin(sel.value || null, "picked"); });
+detectBtn.addEventListener("click", () => {
+  const d = detect();
+  store.set(d.country || "none");
+  renderOrigin(d.country, "detected", d.how, d.tz);
+});
+
+renderFilters();
+renderThings("Tout");
+const saved = store.get();
+if (saved && (COUNTRIES[saved] || saved === "none")) renderOrigin(COUNTRIES[saved] ? saved : null, "picked");
+else renderOrigin(DEFAULT_COUNTRY, "default");
+</script>
+</body>
+</html>
