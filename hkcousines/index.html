@@ -82,7 +82,7 @@
   <header>
     <div class="han-big" aria-hidden="true">香港</div>
     <h1>Une semaine à Hong Kong</h1>
-    <p class="lede">Le programme des cousines, jour par jour : la ville, les îles, la randonnée, les marchés et beaucoup de dim sum.</p>
+    <p class="lede">Le programme des cousines venues de Belgique, jour par jour : la ville, les îles, la randonnée, les marchés et beaucoup de dim sum.</p>
   </header>
 
   <section class="origin" aria-live="polite">
@@ -98,7 +98,7 @@
     <div class="picker">
       <label for="country">Pas le bon pays ?</label>
       <select id="country"></select>
-      <button class="reset" id="reset" type="button" hidden>Revenir à la détection</button>
+      <button class="reset" id="detect" type="button">Détecter mon pays</button>
     </div>
   </section>
 
@@ -107,7 +107,7 @@
   <section class="tips">
     <h3>Avant de partir</h3>
     <ul id="tips"></ul>
-    <p>Le pays est deviné à partir du fuseau horaire et de la langue de votre appareil. Rien n'est envoyé nulle part. Si ce n'est pas le bon, choisissez-le dans le menu.</p>
+    <p>Le programme est réglé sur la Belgique. Vous pouvez choisir un autre pays dans le menu, ou laisser la page le deviner à partir du fuseau horaire et de la langue de votre appareil. Rien n'est envoyé nulle part.</p>
   </section>
 </div>
 
@@ -203,22 +203,23 @@ const store = {
   set(v) { try { v ? localStorage.setItem("hkc-country", v) : localStorage.removeItem("hkc-country"); } catch {} },
 };
 
-const detected = detect();
+const DEFAULT_COUNTRY = "BE";
 const sel = document.getElementById("country");
-const resetBtn = document.getElementById("reset");
+const detectBtn = document.getElementById("detect");
 sel.append(new Option("Autre pays", ""));
 Object.keys(COUNTRIES).map(c => [c, nameOf(c)]).sort((a, b) => a[1].localeCompare(b[1], "fr"))
   .forEach(([c, n]) => sel.append(new Option(n, c)));
 
-function renderOrigin(country, manual) {
+// source: "default" | "picked" | "detected". A detected time zone beats the country's main one.
+function renderOrigin(country, source, how, tz) {
   document.getElementById("who").textContent = country ? nameOf(country) : "Ailleurs";
-  document.getElementById("how").textContent = manual ? "Choisi par vous." : detected.how;
-  const tz = manual ? (country && COUNTRIES[country].tz) : detected.tz;
+  document.getElementById("how").textContent =
+    source === "default" ? "Pays des cousines." : source === "picked" ? "Choisi par vous." : how;
+  tz = tz || (country && COUNTRIES[country].tz);
   document.getElementById("lag").textContent = tz ? lagText(tz) : "—";
   const sameplug = country && COUNTRIES[country].plug;
   document.getElementById("plug").textContent = sameplug ? "Type G, comme chez vous" : "Type G, adaptateur";
   sel.value = country || "";
-  resetBtn.hidden = !manual || detected.country === country;
 
   const tips = [
     "Carte Octopus : métro, bus, tram, ferries et supérettes. Rechargeable au 7-Eleven.",
@@ -227,7 +228,11 @@ function renderOrigin(country, manual) {
     "D'avril à octobre il fait chaud et humide, avec des typhons possibles. Surveillez l'Observatoire de Hong Kong (signal T8 = tout ferme).",
   ];
   if (!sameplug) tips.unshift("Prises britanniques à trois broches (type G) : prenez un adaptateur.");
-  if (country === "FR" || country === "BE" || country === "CH" || country === "LU")
+  if (country === "BE") tips.unshift(
+    "Passeport belge : pas de visa pour un court séjour touristique. Vérifiez quand même les conditions sur diplomatie.belgium.be avant de partir.",
+    "Bancontact ne fonctionne pas sur place : prenez une carte Visa ou Mastercard et retirez quelques dollars de Hong Kong.",
+    "Hong Kong est hors de l'UE : le roaming coûte cher. Achetez une eSIM ou une carte SIM touristique à l'aéroport.");
+  else if (country === "FR" || country === "CH" || country === "LU")
     tips.unshift("Vérifiez les conditions d'entrée pour votre passeport avant le départ. Le passeport doit être valide pendant tout le séjour.");
   const ul = document.getElementById("tips");
   ul.innerHTML = "";
@@ -260,12 +265,17 @@ function renderDays() {
   });
 }
 
-sel.addEventListener("change", () => { store.set(sel.value); renderOrigin(sel.value || null, true); });
-resetBtn.addEventListener("click", () => { store.set(null); renderOrigin(detected.country, false); });
+sel.addEventListener("change", () => { store.set(sel.value || "none"); renderOrigin(sel.value || null, "picked"); });
+detectBtn.addEventListener("click", () => {
+  const d = detect();
+  store.set(d.country || "none");
+  renderOrigin(d.country, "detected", d.how, d.tz);
+});
 
 renderDays();
 const saved = store.get();
-saved && COUNTRIES[saved] ? renderOrigin(saved, true) : renderOrigin(detected.country, false);
+if (saved && (COUNTRIES[saved] || saved === "none")) renderOrigin(COUNTRIES[saved] ? saved : null, "picked");
+else renderOrigin(DEFAULT_COUNTRY, "default");
 </script>
 </body>
 </html>
