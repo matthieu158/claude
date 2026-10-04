@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Les cousines à Hong Kong</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Public+Sans:wght@400;600&family=Noto+Serif+TC:wght@600&display=swap" rel="stylesheet">
+<style>
+  /* Layout: signage-style masthead, a "travel details" strip tuned to where the reader is, then seven day cards in order. */
+  :root {
+    --bg: #f3f5f2;
+    --surface: #ffffff;
+    --ink: #14211c;
+    --muted: #5b6b64;
+    --line: #d5ddd8;
+    --red: #c8102e;
+    --jade: #00745a;
+    --chip: #e6efe9;
+    --display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+    --body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --han: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d1517; --surface: #142024; --ink: #e9f0ec; --muted: #94a69e; --line: #263538;
+      --red: #ff4d6a; --jade: #3fd0a4; --chip: #1b2c2e; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d1517; --surface: #142024; --ink: #e9f0ec; --muted: #94a69e; --line: #263538;
+    --red: #ff4d6a; --jade: #3fd0a4; --chip: #1b2c2e; color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding-inline: 16px; padding-block: 40px 64px; display: grid; gap: 32px; }
+
+  header { display: grid; grid-template-columns: auto 1fr; gap: 8px 24px; align-items: end; }
+  .han-big { font-family: var(--han); font-size: clamp(3.4rem, 12vw, 6.5rem); line-height: .9; color: var(--red); grid-row: span 2; }
+  h1 { font-family: var(--display); font-weight: 900; text-transform: uppercase; font-size: clamp(2.2rem, 7vw, 4rem); line-height: .95; margin: 0; letter-spacing: .01em; text-wrap: balance; }
+  .lede { margin: 0; color: var(--muted); max-width: 60ch; }
+  @media (max-width: 520px) { header { grid-template-columns: 1fr; } .han-big { grid-row: auto; } }
+
+  .origin { display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: center; justify-content: space-between;
+            background: var(--surface); border: 1px solid var(--line); border-left: 6px solid var(--jade); padding: 16px 20px; border-radius: 4px; }
+  .origin > div { min-width: 0; }
+  .eyebrow { font-size: .75rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); font-weight: 600; }
+  .who { font-family: var(--display); font-weight: 700; font-size: 1.6rem; line-height: 1.1; }
+  .how { font-size: .85rem; color: var(--muted); }
+  .facts { display: flex; flex-wrap: wrap; gap: 8px 24px; }
+  .fact .v { font-family: var(--display); font-weight: 700; font-size: 1.3rem; font-variant-numeric: tabular-nums; }
+  .picker { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .picker label { font-size: .85rem; color: var(--muted); }
+  select { font: inherit; font-size: .95rem; padding: 6px 10px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--ink); max-width: 100%; }
+  select:focus-visible, button:focus-visible { outline: 2px solid var(--jade); outline-offset: 2px; }
+  button.reset { font: inherit; font-size: .85rem; background: none; border: none; color: var(--jade); cursor: pointer; text-decoration: underline; padding: 4px; }
+
+  ol.days { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 460px), 1fr)); gap: 16px; }
+  .day { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 20px; display: grid; gap: 12px; align-content: start; }
+  .day-head { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; align-items: baseline; }
+  .num { font-family: var(--display); font-weight: 900; font-size: .9rem; text-transform: uppercase; letter-spacing: .08em; color: var(--red); grid-row: span 2; align-self: start; padding-top: .3em; white-space: nowrap; }
+  .day h2 { font-size: 1.15rem; font-weight: 600; margin: 0; line-height: 1.3; min-width: 0; }
+  .zh { font-family: var(--han); color: var(--muted); font-size: .95rem; }
+  .meta { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: .75rem; background: var(--chip); color: var(--ink); padding: 2px 8px; border-radius: 2px; }
+  .chip.mtr::before { content: "MTR "; color: var(--red); font-weight: 600; }
+  dl.slots { margin: 0; display: grid; grid-template-columns: 6.5em 1fr; gap: 8px 12px; font-size: .95rem; }
+  dl.slots dt { font-size: .75rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); font-weight: 600; padding-top: .2em; }
+  dl.slots dd { margin: 0; min-width: 0; }
+  .tip { font-size: .85rem; color: var(--muted); border-top: 1px dashed var(--line); padding-top: 10px; margin: 0; }
+  .tip strong { color: var(--jade); }
+
+  .tips { display: grid; gap: 8px; border-top: 1px solid var(--line); padding-top: 20px; color: var(--muted); font-size: .9rem; }
+  .tips h3 { font-family: var(--display); font-weight: 700; font-size: 1.3rem; color: var(--ink); margin: 0; text-transform: uppercase; }
+  .tips ul { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; max-width: 75ch; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="han-big" aria-hidden="true">香港</div>
+    <h1>Une semaine à Hong Kong</h1>
+    <p class="lede">Le programme des cousines, jour par jour : la ville, les îles, la randonnée, les marchés et beaucoup de dim sum.</p>
+  </header>
+
+  <section class="origin" aria-live="polite">
+    <div>
+      <div class="eyebrow">Vous partez de</div>
+      <div class="who" id="who">—</div>
+      <div class="how" id="how"></div>
+    </div>
+    <div class="facts">
+      <div class="fact"><div class="eyebrow">Décalage</div><div class="v" id="lag">—</div></div>
+      <div class="fact"><div class="eyebrow">Prises</div><div class="v" id="plug">Type G</div></div>
+    </div>
+    <div class="picker">
+      <label for="country">Pas le bon pays ?</label>
+      <select id="country"></select>
+      <button class="reset" id="reset" type="button" hidden>Revenir à la détection</button>
+    </div>
+  </section>
+
+  <ol class="days" id="days"></ol>
+
+  <section class="tips">
+    <h3>Avant de partir</h3>
+    <ul id="tips"></ul>
+    <p>Le pays est deviné à partir du fuseau horaire et de la langue de votre appareil. Rien n'est envoyé nulle part. Si ce n'est pas le bon, choisissez-le dans le menu.</p>
+  </section>
+</div>
+
+<script>
+// Seven days in order. Slots: [matin, après-midi, soir].
+const DAYS = [
+  { title: "Arrivée et Tsim Sha Tsui", zh: "尖沙咀", area: "Kowloon", mtr: "Tsim Sha Tsui", slots: [
+      "Airport Express jusqu'à Kowloon (environ 20 min). Achetez une carte Octopus à l'aéroport.",
+      "Installez-vous, puis promenade sur l'Avenue of Stars et le front de mer.",
+      "Symphony of Lights à 20 h face à la baie, puis traversée en Star Ferry vers Central pour voir les tours illuminées."],
+    tip: "Premier jour léger : le décalage se fait sentir dès 16 h." },
+  { title: "Central, Sheung Wan et le Peak", zh: "中環 · 太平山頂", area: "Hong Kong Island", mtr: "Central", slots: [
+      "Dim sum dans une grande salle de yum cha, puis Man Mo Temple et les antiquaires de Hollywood Road.",
+      "Tai Kwun (ancien commissariat devenu centre d'art), l'escalator des Mid-Levels et les boutiques de créateurs de PMQ.",
+      "Peak Tram en fin d'après-midi pour le coucher de soleil sur Lugard Road, puis un verre sur un rooftop de Central."],
+    tip: "<strong>Astuce :</strong> en semaine, la file du Peak Tram est bien plus courte qu'un samedi." },
+  { title: "Lantau : Big Buddha et Tai O", zh: "天壇大佛 · 大澳", area: "Île de Lantau", mtr: "Tung Chung", slots: [
+      "Téléphérique Ngong Ping 360 (25 min au-dessus des collines) jusqu'au Bouddha Tian Tan.",
+      "Déjeuner végétarien au monastère Po Lin, puis bus jusqu'au village de pêcheurs de Tai O et ses maisons sur pilotis.",
+      "Petit bateau à Tai O pour tenter d'apercevoir les dauphins roses, retour en bus à Tung Chung."],
+    tip: "<strong>Astuce :</strong> réservez la cabine Crystal (plancher vitré) en ligne." },
+  { title: "Kowloon côté local", zh: "深水埗 · 旺角", area: "Kowloon", mtr: "Sham Shui Po", slots: [
+      "Petit-déjeuner en cha chaan teng : thé au lait, pineapple bun au beurre. Puis Sham Shui Po, ses tissus et son tofu fa.",
+      "Mong Kok : Ladies' Market, marché aux poissons rouges, marché aux fleurs et jardin aux oiseaux de Yuen Po Street.",
+      "Temple Street Night Market : riz en claypot, diseurs de bonne aventure, néons."],
+    tip: "Beaucoup de petites adresses n'acceptent que l'Octopus ou le liquide." },
+  { title: "Randonnée et plage", zh: "龍脊 · 石澳", area: "Sud de l'île", mtr: "Shau Kei Wan + bus 9", slots: [
+      "Dragon's Back, une crête avec la mer des deux côtés (environ 3 h, niveau modéré).",
+      "Arrivée à Big Wave Bay : baignade, puis déjeuner au village de Shek O.",
+      "Retour en tramway « ding ding » à l'étage, à l'avant, jusqu'à Causeway Bay pour dîner."],
+    tip: "<strong>Astuce :</strong> partez tôt, avec de l'eau et de la crème solaire. Le sentier est presque vide en semaine." },
+  { title: "Temples et musées", zh: "黃大仙 · 西九", area: "Kowloon", mtr: "Wong Tai Sin", slots: [
+      "Temple Wong Tai Sin et ses bâtonnets de bonne aventure, puis le couvent de Chi Lin et le jardin de Nan Lian.",
+      "West Kowloon : M+ (culture visuelle) ou le Hong Kong Palace Museum, selon vos goûts.",
+      "Coucher de soleil sur les pelouses de l'Art Park, au bord de l'eau."],
+    tip: "Vérifiez les jours de fermeture des musées et réservez le Palace Museum à l'avance." },
+  { title: "Les îles et le dîner d'adieu", zh: "南丫島", area: "Lamma", mtr: "Central, quai n° 4", slots: [
+      "Ferry pour Lamma (environ 30 min) : pas de voitures, sentier de Yung Shue Wan à Sok Kwu Wan.",
+      "Déjeuner de fruits de mer au bord de l'eau à Sok Kwu Wan, ferry retour.",
+      "Dîner d'adieu : oie rôtie cantonaise ou hot pot, puis un dernier Star Ferry de nuit."],
+    tip: "<strong>Variante :</strong> une journée à Macao en ferry (environ 1 h), passeport obligatoire." },
+];
+
+// Per-country practical details. lagHint is used when the country was picked by hand.
+const COUNTRIES = {
+  FR: { tz: "Europe/Paris" }, BE: { tz: "Europe/Brussels" }, CH: { tz: "Europe/Zurich" }, LU: { tz: "Europe/Luxembourg" },
+  MC: { tz: "Europe/Monaco" }, CA: { tz: "America/Toronto" }, MA: { tz: "Africa/Casablanca" }, TN: { tz: "Africa/Tunis" },
+  SN: { tz: "Africa/Dakar" }, CI: { tz: "Africa/Abidjan" }, RE: { tz: "Indian/Reunion" }, MU: { tz: "Indian/Mauritius" },
+  NC: { tz: "Pacific/Noumea" }, PF: { tz: "Pacific/Tahiti" }, DE: { tz: "Europe/Berlin" }, ES: { tz: "Europe/Madrid" },
+  IT: { tz: "Europe/Rome" }, NL: { tz: "Europe/Amsterdam" }, PT: { tz: "Europe/Lisbon" }, GB: { tz: "Europe/London", plug: true },
+  IE: { tz: "Europe/Dublin", plug: true }, US: { tz: "America/New_York" }, AU: { tz: "Australia/Sydney" },
+  SG: { tz: "Asia/Singapore", plug: true }, MY: { tz: "Asia/Kuala_Lumpur", plug: true }, AE: { tz: "Asia/Dubai", plug: true },
+  CN: { tz: "Asia/Shanghai" }, JP: { tz: "Asia/Tokyo" }, HK: { tz: "Asia/Hong_Kong", plug: true },
+};
+const TZ_TO_COUNTRY = Object.fromEntries(Object.entries(COUNTRIES).map(([c, v]) => [v.tz, c]));
+Object.assign(TZ_TO_COUNTRY, { "America/Montreal": "CA", "America/Vancouver": "CA", "America/Chicago": "US", "America/Los_Angeles": "US",
+  "America/Denver": "US", "Australia/Melbourne": "AU", "Australia/Perth": "AU", "Asia/Urumqi": "CN" });
+
+const regionNames = (() => { try { return new Intl.DisplayNames(["fr"], { type: "region" }); } catch { return null; } })();
+const nameOf = c => (regionNames && regionNames.of(c)) || c;
+
+// Minutes east of UTC for a time zone, right now.
+function offsetMinutes(tz) {
+  try {
+    const parts = new Intl.DateTimeFormat("en-US", { timeZone: tz, hourCycle: "h23", year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "numeric" })
+      .formatToParts(new Date()).reduce((o, p) => (o[p.type] = +p.value, o), {});
+    const asUtc = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute);
+    return Math.round((asUtc - Date.now()) / 60000);
+  } catch { return null; }
+}
+function lagText(tz) {
+  const a = offsetMinutes(tz), b = offsetMinutes("Asia/Hong_Kong");
+  if (a == null || b == null) return "—";
+  const d = (b - a) / 60;
+  if (d === 0) return "Aucun";
+  const h = Math.abs(d).toLocaleString("fr-FR", { maximumFractionDigits: 1 }) + " h";
+  return d > 0 ? `+${h} à HK` : `−${h} à HK`;
+}
+
+function detect() {
+  let tz = "";
+  try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch {}
+  if (TZ_TO_COUNTRY[tz]) return { country: TZ_TO_COUNTRY[tz], tz, how: `Détecté grâce à votre fuseau horaire (${tz}).` };
+  for (const lang of navigator.languages || [navigator.language]) {
+    const m = /-([A-Z]{2})\b/.exec(lang || "");
+    if (m && COUNTRIES[m[1]]) return { country: m[1], tz: tz || COUNTRIES[m[1]].tz, how: `Détecté grâce à la langue de votre navigateur (${lang}).` };
+  }
+  return { country: null, tz, how: "Impossible de détecter votre pays." };
+}
+
+const store = {
+  get() { try { return localStorage.getItem("hkc-country"); } catch { return null; } },
+  set(v) { try { v ? localStorage.setItem("hkc-country", v) : localStorage.removeItem("hkc-country"); } catch {} },
+};
+
+const detected = detect();
+const sel = document.getElementById("country");
+const resetBtn = document.getElementById("reset");
+sel.append(new Option("Autre pays", ""));
+Object.keys(COUNTRIES).map(c => [c, nameOf(c)]).sort((a, b) => a[1].localeCompare(b[1], "fr"))
+  .forEach(([c, n]) => sel.append(new Option(n, c)));
+
+function renderOrigin(country, manual) {
+  document.getElementById("who").textContent = country ? nameOf(country) : "Ailleurs";
+  document.getElementById("how").textContent = manual ? "Choisi par vous." : detected.how;
+  const tz = manual ? (country && COUNTRIES[country].tz) : detected.tz;
+  document.getElementById("lag").textContent = tz ? lagText(tz) : "—";
+  const sameplug = country && COUNTRIES[country].plug;
+  document.getElementById("plug").textContent = sameplug ? "Type G, comme chez vous" : "Type G, adaptateur";
+  sel.value = country || "";
+  resetBtn.hidden = !manual || detected.country === country;
+
+  const tips = [
+    "Carte Octopus : métro, bus, tram, ferries et supérettes. Rechargeable au 7-Eleven.",
+    "La climatisation est très forte à l'intérieur : prévoyez une petite veste, même en été.",
+    "Pas de pourboire attendu : la plupart des restaurants ajoutent 10 % de service.",
+    "D'avril à octobre il fait chaud et humide, avec des typhons possibles. Surveillez l'Observatoire de Hong Kong (signal T8 = tout ferme).",
+  ];
+  if (!sameplug) tips.unshift("Prises britanniques à trois broches (type G) : prenez un adaptateur.");
+  if (country === "FR" || country === "BE" || country === "CH" || country === "LU")
+    tips.unshift("Vérifiez les conditions d'entrée pour votre passeport avant le départ. Le passeport doit être valide pendant tout le séjour.");
+  const ul = document.getElementById("tips");
+  ul.innerHTML = "";
+  for (const t of tips) { const li = document.createElement("li"); li.textContent = t; ul.append(li); }
+}
+
+function renderDays() {
+  const list = document.getElementById("days");
+  const labels = ["Matin", "Après-midi", "Soir"];
+  DAYS.forEach((d, i) => {
+    const li = document.createElement("li");
+    li.className = "day";
+    li.innerHTML = `
+      <div class="day-head"><div class="num">Jour ${i + 1}</div><h2></h2><div class="zh" lang="zh-Hant"></div></div>
+      <div class="meta"><span class="chip"></span><span class="chip mtr"></span></div>
+      <dl class="slots"></dl>
+      <p class="tip"></p>`;
+    li.querySelector("h2").textContent = d.title;
+    li.querySelector(".zh").textContent = d.zh;
+    const chips = li.querySelectorAll(".chip");
+    chips[0].textContent = d.area; chips[1].textContent = d.mtr;
+    const dl = li.querySelector("dl");
+    d.slots.forEach((s, j) => {
+      const dt = document.createElement("dt"); dt.textContent = labels[j];
+      const dd = document.createElement("dd"); dd.textContent = s;
+      dl.append(dt, dd);
+    });
+    li.querySelector(".tip").innerHTML = d.tip; // static, author-written markup
+    list.append(li);
+  });
+}
+
+sel.addEventListener("change", () => { store.set(sel.value); renderOrigin(sel.value || null, true); });
+resetBtn.addEventListener("click", () => { store.set(null); renderOrigin(detected.country, false); });
+
+renderDays();
+const saved = store.get();
+saved && COUNTRIES[saved] ? renderOrigin(saved, true) : renderOrigin(detected.country, false);
+</script>
+</body>
+</html>
