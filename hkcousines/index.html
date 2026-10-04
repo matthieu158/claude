@@ -56,20 +56,22 @@
   select:focus-visible, button:focus-visible { outline: 2px solid var(--jade); outline-offset: 2px; }
   button.reset { font: inherit; font-size: .85rem; background: none; border: none; color: var(--jade); cursor: pointer; text-decoration: underline; padding: 4px; }
 
-  ol.days { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 460px), 1fr)); gap: 16px; }
-  .day { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 20px; display: grid; gap: 12px; align-content: start; }
-  .day-head { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; align-items: baseline; }
-  .num { font-family: var(--display); font-weight: 900; font-size: .9rem; text-transform: uppercase; letter-spacing: .08em; color: var(--red); grid-row: span 2; align-self: start; padding-top: .3em; white-space: nowrap; }
-  .day h2 { font-size: 1.15rem; font-weight: 600; margin: 0; line-height: 1.3; min-width: 0; }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; }
+  .filters button { font: inherit; font-size: .85rem; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+  .filters button[aria-pressed="true"] { background: var(--jade); border-color: var(--jade); color: var(--surface); }
+  .group { display: grid; gap: 12px; }
+  .group-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; border-bottom: 2px solid var(--red); padding-bottom: 6px; }
+  .group h2 { font-family: var(--display); font-weight: 900; text-transform: uppercase; font-size: 1.6rem; line-height: 1; margin: 0; }
+  .sub { color: var(--muted); font-size: .9rem; }
+  ul.things { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; }
+  .thing { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 16px 18px; display: grid; gap: 4px; align-content: start; }
+  .thing-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .thing h3 { font-size: 1.02rem; font-weight: 600; margin: 0; line-height: 1.3; min-width: 0; }
+  .time { font-size: .8rem; font-weight: 600; color: var(--red); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .thing p { margin: 4px 0 6px; font-size: .93rem; }
+  .thing .chip { justify-self: start; }
   .zh { font-family: var(--han); color: var(--muted); font-size: .95rem; }
-  .meta { display: flex; flex-wrap: wrap; gap: 6px; }
   .chip { font-size: .75rem; background: var(--chip); color: var(--ink); padding: 2px 8px; border-radius: 2px; }
-  .chip.mtr::before { content: "MTR "; color: var(--red); font-weight: 600; }
-  dl.slots { margin: 0; display: grid; grid-template-columns: 6.5em 1fr; gap: 8px 12px; font-size: .95rem; }
-  dl.slots dt { font-size: .75rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); font-weight: 600; padding-top: .2em; }
-  dl.slots dd { margin: 0; min-width: 0; }
-  .tip { font-size: .85rem; color: var(--muted); border-top: 1px dashed var(--line); padding-top: 10px; margin: 0; }
-  .tip strong { color: var(--jade); }
 
   .tips { display: grid; gap: 8px; border-top: 1px solid var(--line); padding-top: 20px; color: var(--muted); font-size: .9rem; }
   .tips h3 { font-family: var(--display); font-weight: 700; font-size: 1.3rem; color: var(--ink); margin: 0; text-transform: uppercase; }
@@ -81,8 +83,8 @@
 <div class="wrap">
   <header>
     <div class="han-big" aria-hidden="true">香港</div>
-    <h1>Une semaine à Hong Kong</h1>
-    <p class="lede">Le programme des cousines venues de Belgique, jour par jour : la ville, les îles, la randonnée, les marchés et beaucoup de dim sum.</p>
+    <h1>Que faire à Hong Kong</h1>
+    <p class="lede">Les idées pour la semaine des cousines venues de Belgique, rangées selon la distance depuis leur hôtel à Sheung Wan.</p>
   </header>
 
   <section class="origin" aria-live="polite">
@@ -102,7 +104,10 @@
     </div>
   </section>
 
-  <ol class="days" id="days"></ol>
+  <div class="filters" id="filters" role="group" aria-label="Filtrer par type"></div>
+
+  <div id="groups" style="display:grid;gap:32px"></div>
+  <p class="how" style="margin:0">Temps de trajet approximatifs depuis la station MTR Sheung Wan, hors heures de pointe.</p>
 
   <section class="tips">
     <h3>Avant de partir</h3>
@@ -112,44 +117,41 @@
 </div>
 
 <script>
-// Seven days in order. Slots: [matin, après-midi, soir].
-const DAYS = [
-  { title: "Arrivée et Tsim Sha Tsui", zh: "尖沙咀", area: "Kowloon", mtr: "Tsim Sha Tsui", slots: [
-      "Airport Express jusqu'à Kowloon (environ 20 min). Achetez une carte Octopus à l'aéroport.",
-      "Installez-vous, puis promenade sur l'Avenue of Stars et le front de mer.",
-      "Symphony of Lights à 20 h face à la baie, puis traversée en Star Ferry vers Central pour voir les tours illuminées."],
-    tip: "Premier jour léger : le décalage se fait sentir dès 16 h." },
-  { title: "Central, Sheung Wan et le Peak", zh: "中環 · 太平山頂", area: "Hong Kong Island", mtr: "Central", slots: [
-      "Dim sum dans une grande salle de yum cha, puis Man Mo Temple et les antiquaires de Hollywood Road.",
-      "Tai Kwun (ancien commissariat devenu centre d'art), l'escalator des Mid-Levels et les boutiques de créateurs de PMQ.",
-      "Peak Tram en fin d'après-midi pour le coucher de soleil sur Lugard Road, puis un verre sur un rooftop de Central."],
-    tip: "<strong>Astuce :</strong> en semaine, la file du Peak Tram est bien plus courte qu'un samedi." },
-  { title: "Lantau : Big Buddha et Tai O", zh: "天壇大佛 · 大澳", area: "Île de Lantau", mtr: "Tung Chung", slots: [
-      "Téléphérique Ngong Ping 360 (25 min au-dessus des collines) jusqu'au Bouddha Tian Tan.",
-      "Déjeuner végétarien au monastère Po Lin, puis bus jusqu'au village de pêcheurs de Tai O et ses maisons sur pilotis.",
-      "Petit bateau à Tai O pour tenter d'apercevoir les dauphins roses, retour en bus à Tung Chung."],
-    tip: "<strong>Astuce :</strong> réservez la cabine Crystal (plancher vitré) en ligne." },
-  { title: "Kowloon côté local", zh: "深水埗 · 旺角", area: "Kowloon", mtr: "Sham Shui Po", slots: [
-      "Petit-déjeuner en cha chaan teng : thé au lait, pineapple bun au beurre. Puis Sham Shui Po, ses tissus et son tofu fa.",
-      "Mong Kok : Ladies' Market, marché aux poissons rouges, marché aux fleurs et jardin aux oiseaux de Yuen Po Street.",
-      "Temple Street Night Market : riz en claypot, diseurs de bonne aventure, néons."],
-    tip: "Beaucoup de petites adresses n'acceptent que l'Octopus ou le liquide." },
-  { title: "Randonnée et plage", zh: "龍脊 · 石澳", area: "Sud de l'île", mtr: "Shau Kei Wan + bus 9", slots: [
-      "Dragon's Back, une crête avec la mer des deux côtés (environ 3 h, niveau modéré).",
-      "Arrivée à Big Wave Bay : baignade, puis déjeuner au village de Shek O.",
-      "Retour en tramway « ding ding » à l'étage, à l'avant, jusqu'à Causeway Bay pour dîner."],
-    tip: "<strong>Astuce :</strong> partez tôt, avec de l'eau et de la crème solaire. Le sentier est presque vide en semaine." },
-  { title: "Temples et musées", zh: "黃大仙 · 西九", area: "Kowloon", mtr: "Wong Tai Sin", slots: [
-      "Temple Wong Tai Sin et ses bâtonnets de bonne aventure, puis le couvent de Chi Lin et le jardin de Nan Lian.",
-      "West Kowloon : M+ (culture visuelle) ou le Hong Kong Palace Museum, selon vos goûts.",
-      "Coucher de soleil sur les pelouses de l'Art Park, au bord de l'eau."],
-    tip: "Vérifiez les jours de fermeture des musées et réservez le Palace Museum à l'avance." },
-  { title: "Les îles et le dîner d'adieu", zh: "南丫島", area: "Lamma", mtr: "Central, quai n° 4", slots: [
-      "Ferry pour Lamma (environ 30 min) : pas de voitures, sentier de Yung Shue Wan à Sok Kwu Wan.",
-      "Déjeuner de fruits de mer au bord de l'eau à Sok Kwu Wan, ferry retour.",
-      "Dîner d'adieu : oie rôtie cantonaise ou hot pot, puis un dernier Star Ferry de nuit."],
-    tip: "<strong>Variante :</strong> une journée à Macao en ferry (environ 1 h), passeport obligatoire." },
+// Things to do, grouped by how far they are from Sheung Wan MTR station.
+// Each item: [name, chinese, type, time from Sheung Wan, description].
+const GROUPS = [
+  { title: "À pied depuis Sheung Wan", sub: "Moins de 15 minutes, sans transport", items: [
+    ["Man Mo Temple et Hollywood Road", "文武廟", "Culture", "5 min à pied", "Un temple de 1847 où pendent d'énormes spirales d'encens. Ensuite, les antiquaires de Hollywood Road et le marché aux puces de Cat Street."],
+    ["La rue des produits séchés et Western Market", "海味街 · 西港城", "Cuisine", "5 min à pied", "Des Voeux Road West et Wing Lok Street : ormeaux, champignons, nids d'hirondelle et herboristes. Western Market est un marché couvert édouardien en briques rouges."],
+    ["Dim sum du matin", "飲茶", "Cuisine", "À pied", "Les salles de yum cha de Sheung Wan et Central se remplissent dès 8 h. Commandez har gow, siu mai et char siu bao."],
+    ["Tai Kwun, PMQ et SoHo", "大館", "Culture", "15 min à pied", "Un ancien commissariat et une prison devenus centre d'art. Montez par l'escalator des Mid-Levels jusqu'aux boutiques de créateurs de PMQ."],
+    ["Le tram « ding ding »", "電車", "Balade", "2 min à pied", "Des trams à impériale depuis 1904, arrêt sur Des Voeux Road. Asseyez-vous en haut à l'avant jusqu'à Causeway Bay ou North Point."],
+    ["Lan Kwai Fong et les rooftops", "蘭桂坊", "Soirée", "15 min à pied", "Les ruelles festives de Central, et des bars en terrasse avec vue sur les tours."],
+    ["Le Star Ferry", "天星小輪", "Vue", "15 min à pied", "Depuis le quai n° 7 de Central, 10 minutes de traversée pour quelques dollars. Le pont supérieur offre la meilleure vue de la baie."],
+  ]},
+  { title: "Ailleurs sur l'île", sub: "De 10 minutes à 1 heure", items: [
+    ["Sai Ying Pun et Kennedy Town", "西營盤 · 堅尼地城", "Soirée", "5 min en MTR", "Deux stations à l'ouest : cafés, petits bars, et le coucher de soleil sur le front de mer de Kennedy Town."],
+    ["Victoria Peak", "太平山頂", "Vue", "20 min", "Taxi ou bus 15 jusqu'au sommet, ou le Peak Tram depuis Garden Road. Faites la boucle de Lugard Road au coucher du soleil."],
+    ["Les courses de Happy Valley", "跑馬地", "Soirée", "25 min en tram", "Le mercredi soir en saison (septembre à juillet), courses de chevaux sous les projecteurs au milieu des tours. Entrée bon marché, ambiance bière et paris."],
+    ["Randonnée du Dragon's Back", "龍脊", "Nature", "1 h", "MTR jusqu'à Shau Kei Wan puis bus 9. Une crête avec la mer des deux côtés, qui finit à la plage de Big Wave Bay. Déjeuner ensuite au village de Shek O."],
+  ]},
+  { title: "Kowloon", sub: "De l'autre côté de la baie", items: [
+    ["Tsim Sha Tsui et la Symphony of Lights", "尖沙咀 · 幻彩詠香江", "Vue", "25 min en Star Ferry", "Promenade sur l'Avenue of Stars, puis le spectacle de lumières sur les tours à 20 h. Retour en Star Ferry de nuit."],
+    ["M+ et le Palace Museum", "M+ · 香港故宮", "Culture", "15 min en taxi", "Les deux grands musées de West Kowloon, avec un parc au bord de l'eau. Réservez le Palace Museum à l'avance et vérifiez les jours de fermeture."],
+    ["Temple Street Night Market", "廟街", "Cuisine", "20 min en MTR", "Station Jordan. Riz en claypot, fruits de mer, diseurs de bonne aventure, à partir de 20 h."],
+    ["Les marchés de Mong Kok", "旺角", "Shopping", "25 min en MTR", "Ladies' Market, marché aux poissons rouges, marché aux fleurs et jardin aux oiseaux de Yuen Po Street, tous à quelques rues."],
+    ["Sham Shui Po", "深水埗", "Cuisine", "25 min en MTR", "Le quartier le plus populaire : tofu fa, nouilles, tissus et électronique. Beaucoup d'adresses n'acceptent que le liquide."],
+    ["Wong Tai Sin et Chi Lin", "黃大仙 · 志蓮淨苑", "Culture", "35 min en MTR", "Le temple le plus fréquenté de Hong Kong et ses bâtonnets de bonne aventure, puis le couvent en bois de Chi Lin et le jardin de Nan Lian."],
+  ]},
+  { title: "Plus loin", sub: "Une demi-journée ou une journée entière", items: [
+    ["Macao", "澳門", "Excursion", "Terminal à 2 min à pied", "Le terminal des ferries pour Macao est à Shun Tak Centre, juste au-dessus de la station Sheung Wan. Environ 1 h de traversée. Passeport obligatoire."],
+    ["L'île de Lamma", "南丫島", "Nature", "45 min", "Ferry depuis le quai n° 4 de Central. Pas de voitures, un sentier de Yung Shue Wan à Sok Kwu Wan et des fruits de mer au bord de l'eau."],
+    ["Big Buddha et Ngong Ping 360", "天壇大佛", "Vue", "1 h 15", "MTR jusqu'à Tung Chung puis 25 minutes de téléphérique au-dessus des collines. Déjeuner végétarien au monastère Po Lin."],
+    ["Le village de Tai O", "大澳", "Culture", "+30 min après le Buddha", "Maisons sur pilotis, poisson séché et petits bateaux pour voir les dauphins roses. À combiner avec le Big Buddha."],
+    ["Sai Kung", "西貢", "Nature", "1 h 15", "Fruits de mer choisis dans les bassins du port, puis un kaito (bateau-taxi) vers une plage tranquille."],
+  ]},
 ];
+const TYPES = ["Tout", ...new Set(GROUPS.flatMap(g => g.items.map(i => i[2])))];
 
 // Per-country practical details. lagHint is used when the country was picked by hand.
 const COUNTRIES = {
@@ -222,6 +224,7 @@ function renderOrigin(country, source, how, tz) {
   sel.value = country || "";
 
   const tips = [
+    "Depuis l'aéroport : Airport Express jusqu'à la station Hong Kong (environ 25 min), puis 10 minutes à pied ou un taxi jusqu'à Sheung Wan.",
     "Carte Octopus : métro, bus, tram, ferries et supérettes. Rechargeable au 7-Eleven.",
     "La climatisation est très forte à l'intérieur : prévoyez une petite veste, même en été.",
     "Pas de pourboire attendu : la plupart des restaurants ajoutent 10 % de service.",
@@ -239,30 +242,43 @@ function renderOrigin(country, source, how, tz) {
   for (const t of tips) { const li = document.createElement("li"); li.textContent = t; ul.append(li); }
 }
 
-function renderDays() {
-  const list = document.getElementById("days");
-  const labels = ["Matin", "Après-midi", "Soir"];
-  DAYS.forEach((d, i) => {
-    const li = document.createElement("li");
-    li.className = "day";
-    li.innerHTML = `
-      <div class="day-head"><div class="num">Jour ${i + 1}</div><h2></h2><div class="zh" lang="zh-Hant"></div></div>
-      <div class="meta"><span class="chip"></span><span class="chip mtr"></span></div>
-      <dl class="slots"></dl>
-      <p class="tip"></p>`;
-    li.querySelector("h2").textContent = d.title;
-    li.querySelector(".zh").textContent = d.zh;
-    const chips = li.querySelectorAll(".chip");
-    chips[0].textContent = d.area; chips[1].textContent = d.mtr;
-    const dl = li.querySelector("dl");
-    d.slots.forEach((s, j) => {
-      const dt = document.createElement("dt"); dt.textContent = labels[j];
-      const dd = document.createElement("dd"); dd.textContent = s;
-      dl.append(dt, dd);
-    });
-    li.querySelector(".tip").innerHTML = d.tip; // static, author-written markup
-    list.append(li);
-  });
+function renderThings(filter) {
+  const root = document.getElementById("groups");
+  root.innerHTML = "";
+  for (const g of GROUPS) {
+    const items = g.items.filter(i => filter === "Tout" || i[2] === filter);
+    if (!items.length) continue;
+    const sec = document.createElement("section");
+    sec.className = "group";
+    sec.innerHTML = `<div class="group-head"><h2></h2><span class="sub"></span></div><ul class="things"></ul>`;
+    sec.querySelector("h2").textContent = g.title;
+    sec.querySelector(".sub").textContent = g.sub;
+    const ul = sec.querySelector("ul");
+    for (const [name, zh, type, time, desc] of items) {
+      const li = document.createElement("li");
+      li.className = "thing";
+      li.innerHTML = `<div class="thing-head"><h3></h3><span class="time"></span></div>
+        <div class="zh" lang="zh-Hant"></div><p></p><span class="chip"></span>`;
+      li.querySelector("h3").textContent = name;
+      li.querySelector(".time").textContent = time;
+      li.querySelector(".zh").textContent = zh;
+      li.querySelector("p").textContent = desc;
+      li.querySelector(".chip").textContent = type;
+      ul.append(li);
+    }
+    root.append(sec);
+  }
+  document.querySelectorAll(".filters button").forEach(b => b.setAttribute("aria-pressed", b.dataset.type === filter));
+}
+
+function renderFilters() {
+  const bar = document.getElementById("filters");
+  for (const t of TYPES) {
+    const b = document.createElement("button");
+    b.type = "button"; b.dataset.type = t; b.textContent = t;
+    b.addEventListener("click", () => renderThings(t));
+    bar.append(b);
+  }
 }
 
 sel.addEventListener("change", () => { store.set(sel.value || "none"); renderOrigin(sel.value || null, "picked"); });
@@ -272,7 +288,8 @@ detectBtn.addEventListener("click", () => {
   renderOrigin(d.country, "detected", d.how, d.tz);
 });
 
-renderDays();
+renderFilters();
+renderThings("Tout");
 const saved = store.get();
 if (saved && (COUNTRIES[saved] || saved === "none")) renderOrigin(COUNTRIES[saved] ? saved : null, "picked");
 else renderOrigin(DEFAULT_COUNTRY, "default");
